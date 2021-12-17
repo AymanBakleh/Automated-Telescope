@@ -4,18 +4,26 @@
  * YOUTUBE.COM/AMPSOURCE
  * 
  */
-
+#include <EEPROM.h>
 #include <OneButton.h>
 #include <Wire.h>
 #include <LCD.h>
 #include <LiquidCrystal_I2C.h>
 #define BRIGHTNESS_PIN      10   // Must be a PWM pin
-byte brightness = 125;
+
+#define SAMPLE_TIME 10000 
+
+unsigned long timer;
+
+
 LiquidCrystal_I2C  lcd(0x27,2,1,0,4,5,6,7);
 
-// ROTARY ENCODER
+// Joystick
 long oldPosition  = 0;
 
+
+int eepval=1;
+int valuee;
 
 int buttonPin = 8;
 OneButton button0(buttonPin, true);
@@ -41,7 +49,7 @@ char * messagePadded = "               Ayman Bakleh Omar Alamasry Tareq alkhateb
 // 2 - type,starting value in options array,lowest value options array,max value options array
 int values[] = {1,11,25,50,1450, //0-4 WATCH1
                 2,2,0,2,         //5-8
-                1,200,10,25,255, //9-13
+                1,205,10,25,255, //9-13
                 
                 1,11,25,50,1450, //14-18 WATCH2
                 2,2,0,2,         //19-22
@@ -137,6 +145,12 @@ String temprotationsleft = "";
 void setup() {
   Serial.begin(9600);
 
+
+
+timer = millis(); 
+valuee = EEPROM.read(eepval);
+values[10]=valuee;
+
   // Map rotary button to actions single and doubleclick.
   button0.attachClick(singleClick);
   button0.attachDoubleClick(doubleClick);
@@ -207,9 +221,9 @@ void showLetters(int printStart, int startLetter)
   delay(500);
 }
 void loop() {
-  brightness=values[10];
-  analogWrite(BRIGHTNESS_PIN, brightness);
-    
+ 
+  analogWrite(BRIGHTNESS_PIN, values[10]);
+    valuee=values[10];
     // Listen to button presses.
     button0.tick();
 
@@ -220,6 +234,11 @@ void loop() {
     lcdMenu();
      theZone();
 
+ if(millis()-timer > SAMPLE_TIME)  //check if it's time to do a temp sensor sample
+  {
+   EEPROM.write(eepval,valuee);
+    timer = millis();
+  }
 }
 
 void singleClick() {
