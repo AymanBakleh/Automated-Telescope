@@ -9,7 +9,8 @@
 #include <Wire.h>
 #include <LCD.h>
 #include <LiquidCrystal_I2C.h>
-
+#define BRIGHTNESS_PIN      10   // Must be a PWM pin
+byte brightness = 125;
 LiquidCrystal_I2C  lcd(0x27,2,1,0,4,5,6,7);
 
 // ROTARY ENCODER
@@ -25,11 +26,14 @@ int joystick_y;
 // First number infront of menu text is the layer number that item points to. (Example: 1_Rotation points to Layer 1)
 // Second number infront of menu text is the number of the value connected to that menu item in the values array. (Example: 15Direction points to position 5 in the values array)
 
-String menu[] = {"3","1__Motor Controll","2__Brightness","3__info",       // Layer 0
-                 "1","109Speed",                                         // Layer 1
-                 "3","256Active","2__Item2.2","2__Item2.3",              // Layer 2
-                 "2","3__Created by :","0__Ayman Omar Tarq"  // Layer 3
+String menu[] = {"3","2__Motor Controll","1__settings","3__about us",       // Layer 0
+                 "2","109Brightness", "4__info"                                         // Layer 1 for Settengs
+               //  "1","256Active","2__Item2.2","2__Item2.3",               // Layer 2 for motorcontroll
+               //  "2","3__Created by :","0__Ayman Omar Tarq"               // Layer 3 for info
                             };                         
+
+char * messagePadded = "               Ayman Bakleh Omar Alamasry Tareq alkhateb                ";
+
 
 // VALUES ARRAY
 // TYPES, 1 numeric / 2 character value range
@@ -37,7 +41,7 @@ String menu[] = {"3","1__Motor Controll","2__Brightness","3__info",       // Lay
 // 2 - type,starting value in options array,lowest value options array,max value options array
 int values[] = {1,11,25,50,1450, //0-4 WATCH1
                 2,2,0,2,         //5-8
-                1,600,25,75,600, //9-13
+                1,200,10,25,255, //9-13
                 
                 1,11,25,50,1450, //14-18 WATCH2
                 2,2,0,2,         //19-22
@@ -145,7 +149,7 @@ void setup() {
   // Create the custom character.
   lcd.createChar(0, cursor);
   lcd.createChar(1, watch);
-
+ analogWrite(BRIGHTNESS_PIN, 255);
   lcd.setCursor (2,0);  
   lcd.print("We don't get");
   lcd.setCursor (1,1);  
@@ -159,8 +163,52 @@ void setup() {
   writeCursor();
 
 }
+void theZone(){
+  if(currentLayer==2){
+  
+  lcd.setCursor(1,1);  
+  lcd.print("I Love Tareq");
+  clearLine(0);
+}
+else if(currentLayer==3){
+  clearLine(0);
+  lcd.setCursor(0,0);  
+  lcd.print("Created by SAA");
+  for (int letter = 0; letter <= strlen(messagePadded) - 16; letter++) //From 0 to upto n-16 characters supply to below function
+  {
+    showLetters(0, letter);
+    
+  }
+  currentLayer=0 ;
+    
+    
+ 
+}
+else if(currentLayer==4){
+ 
+  lcd.setCursor (2,0);  
+  lcd.print("We don't get");
+  lcd.setCursor (1,1);  
+  lcd.print("lost at night");
+}
 
+
+}
+void showLetters(int printStart, int startLetter)
+{
+  lcd.setCursor(printStart, 1);
+  for (int letter = startLetter; letter <= startLetter + 15; letter++) // Print only 16 chars in Line #2 starting 'startLetter'
+  {
+    lcd.print(messagePadded[letter]);
+  
+  }
+ 
+  lcd.print(" ");
+  delay(500);
+}
 void loop() {
+  brightness=values[10];
+  analogWrite(BRIGHTNESS_PIN, brightness);
     
     // Listen to button presses.
     button0.tick();
@@ -170,6 +218,7 @@ void loop() {
     
     // Print the LCD menu.
     lcdMenu();
+     theZone();
 
 }
 
@@ -280,7 +329,7 @@ void doubleClick() {
     writeCursor();
   }
 }
-
+int newPosition;
 void rotary_check(){
 
   // Constantly read the position of the rotary encoder
