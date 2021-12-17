@@ -49,7 +49,7 @@ char * messagePadded = "               Ayman Bakleh Omar Alamasry Tareq alkhateb
 // 2 - type,starting value in options array,lowest value options array,max value options array
 int values[] = {1,11,25,50,1450, //0-4 WATCH1
                 2,2,0,2,         //5-8
-                1,205,5,25,255, //9-13
+                1,75,5,0,100, //9-13
                 
                 1,11,25,50,1450, //14-18 WATCH2
                 2,2,0,2,         //19-22
@@ -220,9 +220,10 @@ void showLetters(int printStart, int startLetter)
   lcd.print(" ");
   delay(500);
 }
+int ma ;
 void loop() {
- 
-  analogWrite(BRIGHTNESS_PIN, values[10]);
+ ma=map(values[10],0,100,0,255);
+  analogWrite(BRIGHTNESS_PIN,ma);
     valuee=values[10];
     // Listen to button presses.
     button0.tick();
